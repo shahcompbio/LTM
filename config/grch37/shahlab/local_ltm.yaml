@@ -1,0 +1,11 @@
+pools:
+  standard: null
+  highmem: null
+  multicore: null
+
+memory:
+  low: 2
+  med: 4
+  high: 15
+
+max_cores: null

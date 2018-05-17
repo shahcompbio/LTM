@@ -1,0 +1,6 @@
+pandas
+scipy
+networkx=1.11
+dill
+pyyaml
+bioconductor-cellscape

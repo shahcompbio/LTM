@@ -1,0 +1,2 @@
+include versioneer.py
+include ltm/_version.py

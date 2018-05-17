@@ -1,0 +1,94 @@
+import os
+import sys
+import networkx as nx
+import pandas as pd
+import argparse
+
+
+def root_tree(G, root_id):
+
+    G2=nx.Graph()
+    for ed in G.edges():
+        G2.add_edge(ed[0],ed[1])
+    T=nx.dfs_tree(G2, root_id)#, orientation='ignore')
+    return T
+
+
+def generate_edges_list(gml_tree, root_id, edges_list_path):
+    G=nx.read_gml(gml_tree)
+    # outfile=open(outfolder_path+'/cnv_tree_edges.csv','w')
+    outfile=open(edges_list_path,'w')
+    outfile.write('source,target'+'\n')
+    rooted_tree = root_tree(G, root_id)
+    for e in rooted_tree.edges():
+        outfile.write(str(e[0])+','+str(e[1])+'\n')
+    outfile.close()
+
+def generate_cn_data(merged_matrix, cn_data_path):
+    #cn_file=open(merged_matrix)
+    bins_file=open(merged_matrix)
+    # outfile=open(outfolder_path+'/cnv_data.csv','w')
+    outfile=open(cn_data_path,'w')
+    outfile.write('"chr","start","end","copy_number","single_cell_id"'+'\n')
+
+    # reading the bins list
+    bins_list=[]
+    l=bins_file.readlines()
+    for i in range(1,len(l)):
+        tmp=l[i].strip().split(',')
+        bins_list.append(tmp[0]+','+tmp[1]+','+tmp[2])
+    bins_file.close()
+
+    cn_pd=pd.read_csv(merged_matrix)
+    cell_ids=list(cn_pd)[4:]
+    for i in range(len(cell_ids)):
+        current_cell=cell_ids[i]
+        for b in range(len(bins_list)):
+            outfile.write(bins_list[b]+','+str(cn_pd[current_cell][b]-1)+','+current_cell+'\n')
+    outfile.close()
+
+
+def generate_annotations(merged_matrix, annotations_path):
+    # outfile=open(outfolder_path+'/cnv_annots.tsv','w')
+    outfile=open(annotations_path,'w')
+    outfile.write('single_cell_id' +'\t'+ 'genotype'+'\n')
+    infile=open(merged_matrix)
+    cells=infile.readline().strip().split(',')[4:]
+    for cell_id in cells:
+        #genotype=cell_id[5:7]
+        outfile.write(cell_id+'\t'+'0'+'\n')
+    outfile.close()
+
+def main_generate_all(merged_matrix, annotations_path, edges_list_path, cn_data_path, gml_tree, root_id):
+    generate_edges_list(gml_tree, root_id, edges_list_path)
+    generate_annotations(merged_matrix, annotations_path)
+    generate_cn_data(merged_matrix, cn_data_path)
+
+
+if __name__=='__main__':
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-d","--path_to_data" ,type=str, help='path to data')
+    # parser.add_argument("-o","--path_to_outputs_folder" ,type=str, help='path to outputs folder')
+    parser.add_argument("--path_to_annotations" ,type=str, help='path to output annotations tsv')
+    parser.add_argument("--path_to_edges_list" ,type=str, help='path to output edges list csv')
+    parser.add_argument("--path_to_cn_data" ,type=str, help='path to output cn data csv')
+    parser.add_argument("-t","--path_to_tree" ,type=str, help='path to tree in gml format')
+    parser.add_argument("-r","--root_id" ,type=str, help='id of the root node')
+    args = parser.parse_args()
+
+    # main_generate_all(args.path_to_data, args.path_to_outputs_folder, args.path_to_tree ,args.root_id)
+    main_generate_all(args.path_to_data, args.path_to_annotations, args.path_to_edges_list, args.path_to_cn_data, 
+        args.path_to_tree ,args.root_id)
+
+
+
+
+
+
+#     merged_matrix='/Users/hfarahani/shahlab_root/hfarahani/mg_derakht/data/SSlh_data/raw_data/merged_all.csv'
+#     outfolder_path='/Users/hfarahani/Google Drive/Work/Grants/SA501_DLP_SShi/cellscape/inst/extdata'
+#     file_with_bins='/Users/hfarahani/Google Drive/Work/Grants/SA501_DLP_SShi/data/X3_cn_matrix.csv'
+#     gml_tree='/Users/hfarahani/shahlab_root/hfarahani/mg_derakht/data/SSlh_data/local_SA501_X2_X3_X4_X5_x6.gml'
+#     root_id='SA928-A95670B-R30-C06'
+#     main_generate_all(merged_matrix, outfolder_path, file_with_bins, gml_tree,root_id)
