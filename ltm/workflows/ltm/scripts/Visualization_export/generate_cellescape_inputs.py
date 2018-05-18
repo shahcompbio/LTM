@@ -16,7 +16,6 @@ def root_tree(G, root_id):
 
 def generate_edges_list(gml_tree, root_id, edges_list_path):
     G=nx.read_gml(gml_tree)
-    # outfile=open(outfolder_path+'/cnv_tree_edges.csv','w')
     outfile=open(edges_list_path,'w')
     outfile.write('source,target'+'\n')
     rooted_tree = root_tree(G, root_id)
@@ -27,7 +26,6 @@ def generate_edges_list(gml_tree, root_id, edges_list_path):
 def generate_cn_data(merged_matrix, cn_data_path):
     #cn_file=open(merged_matrix)
     bins_file=open(merged_matrix)
-    # outfile=open(outfolder_path+'/cnv_data.csv','w')
     outfile=open(cn_data_path,'w')
     outfile.write('"chr","start","end","copy_number","single_cell_id"'+'\n')
 
@@ -49,7 +47,6 @@ def generate_cn_data(merged_matrix, cn_data_path):
 
 
 def generate_annotations(merged_matrix, annotations_path):
-    # outfile=open(outfolder_path+'/cnv_annots.tsv','w')
     outfile=open(annotations_path,'w')
     outfile.write('single_cell_id' +'\t'+ 'genotype'+'\n')
     infile=open(merged_matrix)
@@ -69,7 +66,6 @@ if __name__=='__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-d","--path_to_data" ,type=str, help='path to data')
-    # parser.add_argument("-o","--path_to_outputs_folder" ,type=str, help='path to outputs folder')
     parser.add_argument("--path_to_annotations" ,type=str, help='path to output annotations tsv')
     parser.add_argument("--path_to_edges_list" ,type=str, help='path to output edges list csv')
     parser.add_argument("--path_to_cn_data" ,type=str, help='path to output cn data csv')
@@ -77,7 +73,6 @@ if __name__=='__main__':
     parser.add_argument("-r","--root_id" ,type=str, help='id of the root node')
     args = parser.parse_args()
 
-    # main_generate_all(args.path_to_data, args.path_to_outputs_folder, args.path_to_tree ,args.root_id)
     main_generate_all(args.path_to_data, args.path_to_annotations, args.path_to_edges_list, args.path_to_cn_data, 
         args.path_to_tree ,args.root_id)
 

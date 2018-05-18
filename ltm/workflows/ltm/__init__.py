@@ -4,7 +4,7 @@ import pypeliner.managed as mgd
 import tasks
 
 
-def create_ltm_workflow(cn_matrix, filtered_cells, output_gml, config):
+def create_ltm_workflow(cn_matrix, output_gml, config, ltm_method, root_id, filtered_cells=None):
 
     workflow = pypeliner.workflow.Workflow()
 
@@ -14,8 +14,9 @@ def create_ltm_workflow(cn_matrix, filtered_cells, output_gml, config):
         func=tasks.run_ltm,
         args=(
             mgd.InputFile(cn_matrix),
-            mgd.InputFile(filtered_cells),
             mgd.OutputFile(output_gml),
+            ltm_method,
+            filtered_cells,
         ),
     )
 
@@ -28,19 +29,22 @@ def create_ltm_workflow(cn_matrix, filtered_cells, output_gml, config):
             mgd.TempOutputFile('cnv_annots.tsv'),
             mgd.TempOutputFile('cnv_tree_edges.csv'),
             mgd.TempOutputFile('cnv_data.csv'),
-            mgd.InputFile(output_gml)
+            mgd.InputFile(output_gml),
+            root_id,
         ),
     )
 
-    workflow.transform(
-        name='run_cellscape',
-        ctx={'mem': config['memory']['med'], 'pool_id': config['pools']['standard']},
-        func=tasks.run_cellscape,
-        args=(
-            mgd.TempOutputFile('cnv_annots.tsv'),
-            mgd.TempOutputFile('cnv_tree_edges.csv'),
-            mgd.TempOutputFile('cnv_data.csv'),
-        ),
-    )
+    # TODO: merge CSVs into HDF5
+
+    # workflow.transform(
+    #     name='run_cellscape',
+    #     ctx={'mem': config['memory']['med'], 'pool_id': config['pools']['standard']},
+    #     func=tasks.run_cellscape,
+    #     args=(
+    #         mgd.TempInputFile('cnv_annots.tsv'),
+    #         mgd.TempInputFile('cnv_tree_edges.csv'),
+    #         mgd.TempInputFile('cnv_data.csv'),
+    #     ),
+    # )
 
     return workflow

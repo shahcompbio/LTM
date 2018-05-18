@@ -89,11 +89,13 @@ def read_input_np(infile_path, filtered_cells_path):
     
     ###### read list of filtered cells
     filtered_cells_set=set([])
-    filtered_file=open(filtered_cells_path)
-    l=filtered_file.readlines()
-    for i in range(0,len(l)):
-        filtered_cells_set.add(l[i].strip())
-    filtered_file.close()
+
+    if filtered_cells_path != 'None':
+        filtered_file=open(filtered_cells_path)
+        l=filtered_file.readlines()
+        for i in range(0,len(l)):
+            filtered_cells_set.add(l[i].strip())
+        filtered_file.close()
     #######
     
     data = np.genfromtxt(infile_path, delimiter=",", skip_header=1)
@@ -103,7 +105,7 @@ def read_input_np(infile_path, filtered_cells_path):
     for cell_id in cell_ids:
         #cell_data[i]=convert_n_alpha_cn(data[:,i])
         j=cell_ids.index(cell_id)
-        if cell_id in filtered_cells_set:
+        if not filtered_cells_set or (filtered_cells_set and cell_id in filtered_cells_set):
             cell_data[i]=convert_n_alpha_cn(breakpoint_conevert(bps_list, data[:,j+4]))
             cell_id_to_name[i]=cell_ids[j]
         i+=1
