@@ -10,7 +10,7 @@ def root_tree(G, root_id):
     G2=nx.Graph()
     for ed in G.edges():
         G2.add_edge(ed[0],ed[1])
-    T=nx.dfs_tree(G2, root_id)#, orientation='ignore')
+    T=nx.dfs_tree(G2, root_id)
     return T
 
 
@@ -24,7 +24,6 @@ def generate_edges_list(gml_tree, root_id, edges_list_path):
     outfile.close()
 
 def generate_cn_data(merged_matrix, cn_data_path):
-    #cn_file=open(merged_matrix)
     bins_file=open(merged_matrix)
     outfile=open(cn_data_path,'w')
     outfile.write('"chr","start","end","copy_number","single_cell_id"'+'\n')
@@ -48,12 +47,11 @@ def generate_cn_data(merged_matrix, cn_data_path):
 
 def generate_annotations(merged_matrix, annotations_path):
     outfile=open(annotations_path,'w')
-    outfile.write('single_cell_id' +'\t'+ 'genotype'+'\n')
+    outfile.write('single_cell_id' + ',' + 'genotype' + '\n')
     infile=open(merged_matrix)
     cells=infile.readline().strip().split(',')[4:]
     for cell_id in cells:
-        #genotype=cell_id[5:7]
-        outfile.write(cell_id+'\t'+'0'+'\n')
+        outfile.write(cell_id + ',' + '0' + '\n')
     outfile.close()
 
 def main_generate_all(merged_matrix, annotations_path, edges_list_path, cn_data_path, gml_tree, root_id):
@@ -66,7 +64,7 @@ if __name__=='__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-d","--path_to_data" ,type=str, help='path to data')
-    parser.add_argument("--path_to_annotations" ,type=str, help='path to output annotations tsv')
+    parser.add_argument("--path_to_annotations" ,type=str, help='path to output annotations csv')
     parser.add_argument("--path_to_edges_list" ,type=str, help='path to output edges list csv')
     parser.add_argument("--path_to_cn_data" ,type=str, help='path to output cn data csv')
     parser.add_argument("-t","--path_to_tree" ,type=str, help='path to tree in gml format')
@@ -75,15 +73,3 @@ if __name__=='__main__':
 
     main_generate_all(args.path_to_data, args.path_to_annotations, args.path_to_edges_list, args.path_to_cn_data, 
         args.path_to_tree ,args.root_id)
-
-
-
-
-
-
-#     merged_matrix='/Users/hfarahani/shahlab_root/hfarahani/mg_derakht/data/SSlh_data/raw_data/merged_all.csv'
-#     outfolder_path='/Users/hfarahani/Google Drive/Work/Grants/SA501_DLP_SShi/cellscape/inst/extdata'
-#     file_with_bins='/Users/hfarahani/Google Drive/Work/Grants/SA501_DLP_SShi/data/X3_cn_matrix.csv'
-#     gml_tree='/Users/hfarahani/shahlab_root/hfarahani/mg_derakht/data/SSlh_data/local_SA501_X2_X3_X4_X5_x6.gml'
-#     root_id='SA928-A95670B-R30-C06'
-#     main_generate_all(merged_matrix, outfolder_path, file_with_bins, gml_tree,root_id)

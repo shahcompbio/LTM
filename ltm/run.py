@@ -21,14 +21,13 @@ def parse_args():
     parser.add_argument('root_id',
                         help='''ID of the cell to use as root of the tree.''')
 
+    parser.add_argument('config_file',
+                        help='''Path to config yaml file.''')
+
     parser.add_argument('--ltm_method',
                         help='''LTM learning method (Chow Liu grouping or recursive grouping).''',
                         choices=['CLG', 'RG'],
                         default='CLG')
-
-    parser.add_argument('--config_file',
-                        help='''Path to config yaml file.''',
-                        default='ltm/config/grch37/shahlab/local_ltm.yaml')
 
     parser.add_argument('--filtered_cells',
                         help='''Path to filtered cells list.''',
@@ -53,6 +52,7 @@ def main():
         raise Exception('Root id {root_id} is not a cell in the copy number matrix.'.format(root_id=args['root_id']))
 
     output_gml = os.path.join(args['out_dir'], 'tree.gml')
+    output_hdf = os.path.join(args['out_dir'], 'ltm.h5')
 
     if args['filtered_cells']:
         workflow.subworkflow(
@@ -61,6 +61,7 @@ def main():
             args=(
                 mgd.InputFile(args['copy_number_matrix']),
                 mgd.OutputFile(output_gml),
+                mgd.OutputFile(output_hdf),
                 config,
                 args['ltm_method'],
                 args['root_id'],
@@ -74,6 +75,7 @@ def main():
             args=(
                 mgd.InputFile(args['copy_number_matrix']),
                 mgd.OutputFile(output_gml),
+                mgd.OutputFile(output_hdf),
                 config,
                 args['ltm_method'],
                 args['root_id'],

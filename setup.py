@@ -11,7 +11,7 @@ def package_files(directory):
 
 extra_files = package_files('ltm/workflows/ltm/scripts/LTM_main/')
 extra_files += package_files('ltm/workflows/ltm/scripts/Visualization_export/')
-extra_files += ['scripts/*.R']
+extra_files += ['scripts/*.R', 'scripts/*.py']
 
 setup(
     name='ltm_pipeline',

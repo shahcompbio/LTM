@@ -1,5 +1,6 @@
 import os
 import pypeliner
+from scripts import hdfutils
 
 scripts_directory = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'scripts')
 
@@ -28,6 +29,12 @@ def generate_cellscape_inputs(cn_matrix, annotations, edges_list, cn_data, tree_
             '--root_id', root_id]
 
     pypeliner.commandline.execute(*cmd)
+
+def concatenate_csvs_to_hdf(annotations, edges_list, cn_data, outfile):
+    csv_files = [annotations, edges_list, cn_data]
+    tablenames = ['annotations', 'edges_list', 'cn_data']
+
+    hdfutils.concat_csvs_to_hdf(csv_files, outfile, tablenames)
 
 
 def run_cellscape(annotations, edges_list, cn_data):
