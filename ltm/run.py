@@ -21,8 +21,9 @@ def parse_args():
     parser.add_argument('root_id',
                         help='''ID of the cell to use as root of the tree.''')
 
-    parser.add_argument('config_file',
-                        help='''Path to config yaml file.''')
+    parser.add_argument('--config_file',
+                        help='''Path to config yaml file.''',
+                        default=os.path.join(os.path.realpath(os.path.dirname(__file__)), '../config/ltm.yaml'))
 
     parser.add_argument('--ltm_method',
                         help='''LTM learning method (Chow Liu grouping or recursive grouping).''',
@@ -46,41 +47,37 @@ def main():
 
     workflow = pypeliner.workflow.Workflow()
 
-    filtered_cells = args['filtered_cells']
-
     if not utils.check_root_id(args['root_id'], args['copy_number_matrix']):
         raise Exception('Root id {root_id} is not a cell in the copy number matrix.'.format(root_id=args['root_id']))
 
-    output_gml = os.path.join(args['out_dir'], 'tree.gml')
-    output_hdf = os.path.join(args['out_dir'], 'ltm.h5')
+    cells_list = utils.get_cells_list(args['filtered_cells'], args['copy_number_matrix'])
 
-    if args['filtered_cells']:
-        workflow.subworkflow(
-            name='ltm',
-            func=ltm.create_ltm_workflow,
-            args=(
-                mgd.InputFile(args['copy_number_matrix']),
-                mgd.OutputFile(output_gml),
-                mgd.OutputFile(output_hdf),
-                config,
-                args['ltm_method'],
-                args['root_id'],
-                mgd.InputFile(args['filtered_cells']),
-            ),
-        )
-    else:
-        workflow.subworkflow(
-            name='ltm',
-            func=ltm.create_ltm_workflow,
-            args=(
-                mgd.InputFile(args['copy_number_matrix']),
-                mgd.OutputFile(output_gml),
-                mgd.OutputFile(output_hdf),
-                config,
-                args['ltm_method'],
-                args['root_id'],
-            ),
-        )
+    output_gml = os.path.join(args['out_dir'], 'tree.gml')
+
+    # Outputs required for visualization with cellscape
+    cnv_annots_csv = os.path.join(args['out_dir'], 'cnv_annots.csv')
+    cnv_tree_edges_csv = os.path.join(args['out_dir'], 'cnv_tree_edges.csv')
+    cnv_data_csv = os.path.join(args['out_dir'], 'cnv_data.csv')
+    output_rmd = os.path.join(args['out_dir'], 'cellscape.Rmd')
+    output_hdf = os.path.join(args['out_dir'], 'cellscape_inputs.h5')
+
+    workflow.subworkflow(
+        name='ltm',
+        func=ltm.create_ltm_workflow,
+        args=(
+            mgd.InputFile(args['copy_number_matrix']),
+            cells_list,
+            mgd.OutputFile(output_gml),
+            mgd.OutputFile(cnv_annots_csv),
+            mgd.OutputFile(cnv_tree_edges_csv),
+            mgd.OutputFile(cnv_data_csv),
+            mgd.OutputFile(output_rmd),
+            mgd.OutputFile(output_hdf),
+            config,
+            args['ltm_method'],
+            args['root_id'],
+        ),
+    )
 
     pyp.run(workflow)
 

@@ -9,8 +9,6 @@ import numpy as np
 import string
 
  
-
-
 def find_symboles(data_folder):
     # find the set of symbols for CN from HMMCopy data
     symbols_set = set([])
@@ -34,16 +32,12 @@ def find_symboles(data_folder):
     return symbols_list
     
     
-
-
 def convert_num_to_alphabet(n):
     import string
     for x, y in zip(range(1, 27), string.ascii_lowercase):
         print(x, y)
 
-
-
-    
+   
 def convert_n_alpha_cn(inar):
     num2alpha = dict(zip(range(0, 27), string.ascii_lowercase))
     
@@ -52,8 +46,6 @@ def convert_n_alpha_cn(inar):
         t=int(n)
         s+=num2alpha[t]
     return s
-
-
 
 
 def break_points_finder(infile_path):
@@ -70,6 +62,7 @@ def break_points_finder(infile_path):
 
     return bps_list
 
+
 def breakpoint_conevert(bps_list, pre_cns):
     res_list=[]
     for i in range(len(pre_cns)):
@@ -78,32 +71,21 @@ def breakpoint_conevert(bps_list, pre_cns):
     return res_list
         
 
-def read_input_np(infile_path, filtered_cells_path):
+def read_input_np(infile_path, filtered_cells):
     
     cell_id_to_name = {}
     cell_id=0
     
     bps_list= break_points_finder(infile_path)
-
-    cell_data={}
-    
-    ###### read list of filtered cells
-    filtered_cells_set=set([])
-
-    if filtered_cells_path != 'None':
-        filtered_file=open(filtered_cells_path)
-        l=filtered_file.readlines()
-        for i in range(0,len(l)):
-            filtered_cells_set.add(l[i].strip())
-        filtered_file.close()
-    #######
+    filtered_cells_set = set(filtered_cells)
     
     data = np.genfromtxt(infile_path, delimiter=",", skip_header=1)
     infile=open(infile_path)
     cell_ids=infile.readline().strip().split(',')[4:]
+    cell_data={}
     i=0
+
     for cell_id in cell_ids:
-        #cell_data[i]=convert_n_alpha_cn(data[:,i])
         j=cell_ids.index(cell_id)
         if not filtered_cells_set or (filtered_cells_set and cell_id in filtered_cells_set):
             cell_data[i]=convert_n_alpha_cn(breakpoint_conevert(bps_list, data[:,j+4]))
@@ -115,6 +97,7 @@ def read_input_np(infile_path, filtered_cells_path):
         position_data[i] = ([d[i] for d in cell_data.values()])
     
     return cell_data,position_data,cell_id_to_name
+
 
 def find_symbole_number(infile_path):
     
@@ -130,45 +113,38 @@ def find_symbole_number(infile_path):
     return max_cn
 
 
-
-def read_hmm_cn_data(infile_path, res_path, LTM_method, filtered_cells_path):
-    
-
+def read_hmm_cn_data(infile_path, res_path, LTM_method, filtered_cells):
     max_cn=find_symbole_number(infile_path)
     
     all_symbols_list=['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w']
     symbols_list=all_symbols_list[0:max_cn+1]
-    
     
     if LTM_method=='CLG':
         method=tr.Recon_Method.CHOW_LIU_GROUPING
     if LTM_method=='RG':
         method=tr.Recon_Method.RECURSIVE_GROUPING
     
-    
     tau = 3
     epsilon = 0.08
 
     root_id = 0 
     
-    cell_data,position_data,cell_id_to_name = read_input_np(infile_path, filtered_cells_path)
+    cell_data,position_data,cell_id_to_name = read_input_np(infile_path, filtered_cells)
     
     recon_settings = tr.Recon_Settings(method, tau, epsilon)
 
     result = tr.reconstruct(recon_settings, position_data, cell_data, symbols_list)#, root_id, 0, False)
     nx.relabel_nodes(result[0], cell_id_to_name, copy = False)
     nx.write_gml(result[0], res_path)
-    
-    
+        
        
 if __name__=='__main__':
-    
-    
+       
     parser = argparse.ArgumentParser()
     parser.add_argument("-infile_path", help="path to the data folder.")
     parser.add_argument("-res_path", help="Path to the results.")
     parser.add_argument("-method", help="LTM learning method, CLG or RG.")
-    parser.add_argument("-filtered_cells_path", help="Path to list of the filtered cells.")
+    parser.add_argument("-filtered_cells", help="List of filtered cells.")
     
     args = parser.parse_args()
     infile_path=args.infile_path

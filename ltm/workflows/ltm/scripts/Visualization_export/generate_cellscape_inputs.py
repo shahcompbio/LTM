@@ -23,6 +23,7 @@ def generate_edges_list(gml_tree, root_id, edges_list_path):
         outfile.write(str(e[0])+','+str(e[1])+'\n')
     outfile.close()
 
+
 def generate_cn_data(merged_matrix, cn_data_path):
     bins_file=open(merged_matrix)
     outfile=open(cn_data_path,'w')
@@ -54,6 +55,7 @@ def generate_annotations(merged_matrix, annotations_path):
         outfile.write(cell_id + ',' + '0' + '\n')
     outfile.close()
 
+
 def main_generate_all(merged_matrix, annotations_path, edges_list_path, cn_data_path, gml_tree, root_id):
     generate_edges_list(gml_tree, root_id, edges_list_path)
     generate_annotations(merged_matrix, annotations_path)
@@ -72,4 +74,4 @@ if __name__=='__main__':
     args = parser.parse_args()
 
     main_generate_all(args.path_to_data, args.path_to_annotations, args.path_to_edges_list, args.path_to_cn_data, 
-        args.path_to_tree ,args.root_id)
+        args.path_to_tree, args.root_id)

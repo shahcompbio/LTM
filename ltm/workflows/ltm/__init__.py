@@ -3,58 +3,71 @@ import pypeliner
 import pypeliner.managed as mgd
 import tasks
 
+from scripts import hdfutils
+from scripts.LTM_main import ltm
+from scripts.Visualization_export import generate_cellscape_inputs
 
-def create_ltm_workflow(cn_matrix, output_gml, output_hdf, config, ltm_method, root_id, filtered_cells=None):
+
+def create_ltm_workflow(cn_matrix,
+                        cells_list,
+                        output_gml,
+                        cnv_annots_csv,
+                        cnv_tree_edges_csv,
+                        cnv_data_csv,
+                        output_rmd,
+                        output_hdf,
+                        config,
+                        ltm_method,
+                        root_id):
 
     workflow = pypeliner.workflow.Workflow()
 
     workflow.transform(
         name='run_ltm',
         ctx={'mem': config['memory']['med'], 'pool_id': config['pools']['standard']},
-        func=tasks.run_ltm,
+        func=ltm.read_hmm_cn_data,
         args=(
             mgd.InputFile(cn_matrix),
             mgd.OutputFile(output_gml),
             ltm_method,
-            filtered_cells,
+            cells_list,
         ),
     )
 
     workflow.transform(
         name='generate_cellscape_inputs',
         ctx={'mem': config['memory']['med'], 'pool_id': config['pools']['standard']},
-        func=tasks.generate_cellscape_inputs,
+        func=generate_cellscape_inputs.main_generate_all,
         args=(
             mgd.InputFile(cn_matrix),
-            mgd.TempOutputFile('cnv_annots.csv'),
-            mgd.TempOutputFile('cnv_tree_edges.csv'),
-            mgd.TempOutputFile('cnv_data.csv'),
+            mgd.OutputFile(cnv_annots_csv),
+            mgd.OutputFile(cnv_tree_edges_csv),
+            mgd.OutputFile(cnv_data_csv),
             mgd.InputFile(output_gml),
             root_id,
         ),
     )
 
     workflow.transform(
-        name='merge_csvs_to_hdf5',
+        name='create_cellscape_rmarkdown',
         ctx={'mem': config['memory']['med'], 'pool_id': config['pools']['standard']},
-        func=tasks.concatenate_csvs_to_hdf,
+        func=tasks.move_cellscape,
         args=(
-            mgd.TempInputFile('cnv_annots.csv'),
-            mgd.TempInputFile('cnv_tree_edges.csv'),
-            mgd.TempInputFile('cnv_data.csv'),
-            mgd.OutputFile(output_hdf),
+            mgd.OutputFile(output_rmd),
         ),
     )
 
-    # workflow.transform(
-    #     name='run_cellscape',
-    #     ctx={'mem': config['memory']['med'], 'pool_id': config['pools']['standard']},
-    #     func=tasks.run_cellscape,
-    #     args=(
-    #         mgd.TempInputFile('cnv_annots.tsv'),
-    #         mgd.TempInputFile('cnv_tree_edges.csv'),
-    #         mgd.TempInputFile('cnv_data.csv'),
-    #     ),
-    # )
+    workflow.transform(
+        name='merge_csvs_to_hdf5',
+        ctx={'mem': config['memory']['med'], 'pool_id': config['pools']['standard']},
+        func=hdfutils.concat_csvs_to_hdf,
+        args=(
+            [mgd.InputFile(cnv_annots_csv),
+            mgd.InputFile(cnv_tree_edges_csv),
+            mgd.InputFile(cnv_data_csv)],
+            mgd.OutputFile(output_hdf),
+            ['annotations', 'edges_list', 'cn_data'],
+        ),
+    )
 
     return workflow

@@ -19,7 +19,7 @@ The pipeline takes in:
 * a CSV file of copy numbers for a list of cells,
 * the path to the output directory,
 * the ID of the cell to be used as the root of the tree, and
-* the path to the config YAMl file that specifies the pools and their memory
+* the path to the config YAML file that specifies the pools and their memory
 
 Optionally, it can take in:
 * `--ltm_method`: method used for learning (CLG or RG)
