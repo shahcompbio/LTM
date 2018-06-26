@@ -3,12 +3,11 @@ import argparse
 import utils
 import pypeliner
 import pypeliner.managed as mgd
-from workflows import ltm
+from workflows import ltm, ltm_scale
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     pypeliner.app.add_arguments(parser)
 
@@ -25,14 +24,23 @@ def parse_args():
                         help='''Path to config yaml file.''',
                         default=os.path.join(os.path.realpath(os.path.dirname(__file__)), '../config/ltm.yaml'))
 
+    parser.add_argument('--filtered_cells',
+                        help='''Path to filtered cells list.''',
+                        default=None)
+
     parser.add_argument('--ltm_method',
                         help='''LTM learning method (Chow Liu grouping or recursive grouping).''',
                         choices=['CLG', 'RG'],
                         default='CLG')
 
-    parser.add_argument('--filtered_cells',
-                        help='''Path to filtered cells list.''',
-                        default=None)
+    parser.add_argument('--scale',
+                        help='''Use scaled minimum spanning tree method.''',
+                        action='store_true')
+
+    parser.add_argument('--number_of_jobs',
+                        help='''Number of jobs to submit for distance calculation for scaled method.''',
+                        default=10,
+                        type=int)
 
     args = vars(parser.parse_args())
 
@@ -61,23 +69,44 @@ def main():
     output_rmd = os.path.join(args['out_dir'], 'cellscape.Rmd')
     output_hdf = os.path.join(args['out_dir'], 'cellscape_inputs.h5')
 
-    workflow.subworkflow(
-        name='ltm',
-        func=ltm.create_ltm_workflow,
-        args=(
-            mgd.InputFile(args['copy_number_matrix']),
-            cells_list,
-            mgd.OutputFile(output_gml),
-            mgd.OutputFile(cnv_annots_csv),
-            mgd.OutputFile(cnv_tree_edges_csv),
-            mgd.OutputFile(cnv_data_csv),
-            mgd.OutputFile(output_rmd),
-            mgd.OutputFile(output_hdf),
-            config,
-            args['ltm_method'],
-            args['root_id'],
-        ),
-    )
+    if args['scale']:
+        print 'Running LTM scale'
+        workflow.subworkflow(
+            name='ltm_scale',
+            func=ltm_scale.create_ltm_scale_workflow,
+            args=(
+                mgd.InputFile(args['copy_number_matrix']),
+                cells_list,
+                mgd.OutputFile(output_gml),
+                mgd.OutputFile(cnv_annots_csv),
+                mgd.OutputFile(cnv_tree_edges_csv),
+                mgd.OutputFile(cnv_data_csv),
+                mgd.OutputFile(output_rmd),
+                mgd.OutputFile(output_hdf),
+                config,
+                args['root_id'],
+                args['number_of_jobs'],
+            ),
+        )
+    else:
+        print 'Running LTM'
+        workflow.subworkflow(
+            name='ltm',
+            func=ltm.create_ltm_workflow,
+            args=(
+                mgd.InputFile(args['copy_number_matrix']),
+                cells_list,
+                mgd.OutputFile(output_gml),
+                mgd.OutputFile(cnv_annots_csv),
+                mgd.OutputFile(cnv_tree_edges_csv),
+                mgd.OutputFile(cnv_data_csv),
+                mgd.OutputFile(output_rmd),
+                mgd.OutputFile(output_hdf),
+                config,
+                args['ltm_method'],
+                args['root_id'],
+            ),
+        )
 
     pyp.run(workflow)
 

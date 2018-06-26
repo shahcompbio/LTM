@@ -3,9 +3,9 @@ import pypeliner
 import pypeliner.managed as mgd
 import tasks
 
-from scripts import hdfutils
-from scripts.LTM_main import ltm
-from scripts.Visualization_export import generate_cellscape_inputs
+from ltm.ltm import hdfutils
+from ltm.ltm.LTM_main import ltm
+from ltm.ltm.Visualization_export import generate_cellscape_inputs
 
 
 def create_ltm_workflow(cn_matrix,

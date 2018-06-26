@@ -1,14 +1,12 @@
 import os
-import pypeliner
 import shutil
+from ltm import ltm
 
-from scripts.LTM_main import ltm
-
-scripts_directory = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'scripts')
+ltm_directory = os.path.realpath(os.path.dirname(ltm.__file__))
 
 
 def move_cellscape(outfile):
-    cellscape_rmarkdown = os.path.join(scripts_directory, 'cellscape.Rmd')
+    cellscape_rmarkdown = os.path.join(ltm_directory, 'cellscape.Rmd')
 
     shutil.copy(cellscape_rmarkdown, outfile)
 

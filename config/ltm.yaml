@@ -9,3 +9,5 @@ memory:
   high: 15
 
 max_cores: null
+
+threads: 8
