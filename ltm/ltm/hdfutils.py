@@ -38,7 +38,7 @@ def merge_csvs_to_hdf_on_disk(infiles, outfile, tablename):
 
 
 def convert_csv_to_hdf(infile, outfile, tablename):
-    df = pd.read_csv(infile)
+    df = pd.read_csv(infile, dtype = {'chr': str})
 
     df = df.infer_objects()
 

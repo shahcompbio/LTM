@@ -14,11 +14,12 @@ def root_tree(G, root_id):
     return T
 
 
-def generate_edges_list(gml_tree, root_id, edges_list_path):
+def generate_edges_list(gml_tree, root_id, edges_list_path, rooted_gml_tree):
     G=nx.read_gml(gml_tree)
     outfile=open(edges_list_path,'w')
     outfile.write('source,target'+'\n')
     rooted_tree = root_tree(G, root_id)
+    nx.write_gml(rooted_tree, rooted_gml_tree)
     for e in rooted_tree.edges():
         outfile.write(str(e[0])+','+str(e[1])+'\n')
     outfile.close()
@@ -42,7 +43,7 @@ def generate_cn_data(merged_matrix, cn_data_path):
     for i in range(len(cell_ids)):
         current_cell=cell_ids[i]
         for b in range(len(bins_list)):
-            outfile.write(bins_list[b]+','+str(cn_pd[current_cell][b]-1)+','+current_cell+'\n')
+            outfile.write(bins_list[b]+','+str(cn_pd[current_cell][b])+','+current_cell+'\n')
     outfile.close()
 
 
@@ -52,12 +53,12 @@ def generate_annotations(merged_matrix, annotations_path):
     infile=open(merged_matrix)
     cells=infile.readline().strip().split(',')[4:]
     for cell_id in cells:
-        outfile.write(cell_id + ',' + '0' + '\n')
+        outfile.write(cell_id + ',' + '0' + '\n') # All cells annotated with 0
     outfile.close()
 
 
-def main_generate_all(merged_matrix, annotations_path, edges_list_path, cn_data_path, gml_tree, root_id):
-    generate_edges_list(gml_tree, root_id, edges_list_path)
+def main_generate_all(merged_matrix, annotations_path, edges_list_path, cn_data_path, gml_tree, rooted_gml_tree, root_id):
+    generate_edges_list(gml_tree, root_id, edges_list_path, rooted_gml_tree)
     generate_annotations(merged_matrix, annotations_path)
     generate_cn_data(merged_matrix, cn_data_path)
 

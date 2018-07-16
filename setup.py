@@ -9,9 +9,10 @@ def package_files(directory):
             paths.append(os.path.join('..', path, filename))
     return paths
 
-extra_files = package_files('ltm/workflows/ltm/scripts/LTM_main/')
-extra_files += package_files('ltm/workflows/ltm/scripts/Visualization_export/')
-extra_files += ['scripts/*.R', 'scripts/*.py']
+# extra_files = package_files('ltm/workflows/ltm/scripts/LTM_main/')
+# extra_files += package_files('ltm/workflows/ltm/scripts/Visualization_export/')
+extra_files = package_files('ltm/ltm/')
+# extra_files += ['scripts/*.R', 'scripts/*.py']
 
 setup(
     name='ltm_pipeline',

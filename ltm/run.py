@@ -17,12 +17,14 @@ def parse_args():
     parser.add_argument('out_dir',
                         help='''Path to output files.''')
 
-    parser.add_argument('root_id',
-                        help='''ID of the cell to use as root of the tree.''')
 
+    parser.add_argument('--root_id',
+                        help='''ID of the cell to use as root of the tree. Default: first SA928 cell''',
+                        default=None)
+    # FIXME
     parser.add_argument('--config_file',
                         help='''Path to config yaml file.''',
-                        default=os.path.join(os.path.realpath(os.path.dirname(__file__)), '../config/ltm.yaml'))
+                        default=None)
 
     parser.add_argument('--filtered_cells',
                         help='''Path to filtered cells list.''',
@@ -49,18 +51,33 @@ def parse_args():
 
 def main():
     args = parse_args()
-    config = utils.load_config(args)
+
+    if args['config_file']:
+        if not os.path.isfile(args['config_file']):
+            raise Exception('Config file {config_file} does not exist.'.format(config_file=args['config_file']))
+        config_file = args['config_file']
+    else:
+        config_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'config', 'ltm.yaml')
+
+    config = utils.load_config(config_file)
     
     pyp = pypeliner.app.Pypeline(config=args)
-
     workflow = pypeliner.workflow.Workflow()
-
-    if not utils.check_root_id(args['root_id'], args['copy_number_matrix']):
-        raise Exception('Root id {root_id} is not a cell in the copy number matrix.'.format(root_id=args['root_id']))
 
     cells_list = utils.get_cells_list(args['filtered_cells'], args['copy_number_matrix'])
 
+    if not os.path.exists(args['out_dir']):
+        os.makedirs(args['out_dir'])
+
+    if args['root_id']:
+        if args['root_id'] not in cells_list:
+            raise Exception('Root ID {root_id} is not a cell in the copy number matrix.'.format(root_id=args['root_id']))
+        root_id = args['root_id']
+    else:
+        root_id = utils.get_root(cells_list, args['out_dir'])
+
     output_gml = os.path.join(args['out_dir'], 'tree.gml')
+    output_rooted_gml = os.path.join(args['out_dir'], 'rooted_tree.gml')
 
     # Outputs required for visualization with cellscape
     cnv_annots_csv = os.path.join(args['out_dir'], 'cnv_annots.csv')
@@ -78,6 +95,7 @@ def main():
                 mgd.InputFile(args['copy_number_matrix']),
                 cells_list,
                 mgd.OutputFile(output_gml),
+                mgd.OutputFile(output_rooted_gml),
                 mgd.OutputFile(cnv_annots_csv),
                 mgd.OutputFile(cnv_tree_edges_csv),
                 mgd.OutputFile(cnv_data_csv),
@@ -97,6 +115,7 @@ def main():
                 mgd.InputFile(args['copy_number_matrix']),
                 cells_list,
                 mgd.OutputFile(output_gml),
+                mgd.OutputFile(output_rooted_gml),
                 mgd.OutputFile(cnv_annots_csv),
                 mgd.OutputFile(cnv_tree_edges_csv),
                 mgd.OutputFile(cnv_data_csv),
@@ -104,7 +123,7 @@ def main():
                 mgd.OutputFile(output_hdf),
                 config,
                 args['ltm_method'],
-                args['root_id'],
+                root_id,
             ),
         )
 

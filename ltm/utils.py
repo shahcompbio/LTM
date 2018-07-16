@@ -1,25 +1,18 @@
 import csv
 import yaml
+import os
 import pandas as pd
 
 
-def load_config(args):
+def load_config(config_file):
     try:
-        with open(args['config_file']) as infile:
+        with open(config_file) as infile:
             config = yaml.load(infile)
 
     except IOError:
         raise Exception(
-            'Unable to open config file: {0}'.format(
-                args['config_file']))
+            'Unable to open config file: {0}'.format(config_file))
     return config
-
-
-def check_root_id(root_id, cn_matrix):
-
-    cn = pd.read_csv(cn_matrix, nrows=1)
-
-    return root_id in cn.columns
 
 
 def get_cells_list(filtered_cells, cn_matrix):
@@ -39,3 +32,14 @@ def get_cells_list(filtered_cells, cn_matrix):
         return cells_list
     else:
         return cn
+
+def get_root(cells_list, out_dir):
+    for cell in cells_list:
+        if 'SA928' in cell:
+            root_txt = os.path.join(out_dir, 'root.txt')
+            with open(root_txt, 'w') as outfile:
+                outfile.write(cell)
+            outfile.close()
+            return cell
+
+    raise Exception('No SA928 cells in the copy number matrix.')
