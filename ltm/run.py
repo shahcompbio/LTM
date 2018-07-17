@@ -15,13 +15,13 @@ def parse_args():
                         help='''Path to copy number matrix (csv file).''')
 
     parser.add_argument('out_dir',
-                        help='''Path to output files.''')
+                        help='''Path to output directory.''')
 
 
     parser.add_argument('--root_id',
                         help='''ID of the cell to use as root of the tree. Default: first SA928 cell''',
                         default=None)
-    # FIXME
+
     parser.add_argument('--config_file',
                         help='''Path to config yaml file.''',
                         default=None)
