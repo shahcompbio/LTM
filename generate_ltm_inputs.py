@@ -55,6 +55,20 @@ def get_cn_matrix_from_hdf(hmmcopy_hdf_file, ploidy):
 	df.columns = df.columns.astype(str)
 	df = df.reset_index()
 
+	chrom = []
+	start = []
+	end = []
+	width = []
+	for i, b in df['bin'].iteritems():
+		chrom.append(b[0])
+		start.append(b[1])
+		end.append(b[2])
+		width.append(b[2] - b[1] + 1)
+	df['chr'] = chrom
+	df['start'] = start
+	df['end'] = end
+	df['width'] = width
+
 	return df, dropped_cells
 
 
