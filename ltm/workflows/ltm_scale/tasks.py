@@ -2,7 +2,9 @@ import os
 import shutil
 import pypeliner
 import multiprocessing
+import subprocess
 from scipy.special import comb
+from pypeliner_utils import helpers
 
 from ltm import ltm
 
@@ -43,11 +45,13 @@ def _calculate_distances_worker(node_pair_csv, outfile, cn_matrix):
     cmd = ['python', script, '-input_file', node_pair_csv,
             '-output_path', outfile, '-data_path', cn_matrix]
 
-    pypeliner.commandline.execute(*cmd)
+    # pypeliner.commandline.execute(*cmd)
+    # subprocess.check_call(cmd)
+    helpers.run_cmd(cmd)
 
 
-def calculate_distances(node_pair_csvs, cn_matrix, outfiles):
-    count = multiprocessing.cpu_count()
+def calculate_distances(node_pair_csvs, cn_matrix, outfiles, config):
+    count = config.get('threads', multiprocessing.cpu_count())
     pool = multiprocessing.Pool(processes=count)
 
     tasks = []
@@ -69,7 +73,7 @@ def calculate_distances(node_pair_csvs, cn_matrix, outfiles):
 
 ## VISUALIZATION ##
 
-def generate_cellscape_inputs(cn_matrix, annotations, edges_list, cn_data, tree_gml, root_id):
+def generate_cellscape_inputs(cn_matrix, annotations, edges_list, cn_data, tree_gml, rooted_tree_gml, root_id):
     script = os.path.join(ltm_directory, 'Visualization_export', 'generate_cellscape_inputs.py')
 
     cmd = ['python', script, 
@@ -78,6 +82,7 @@ def generate_cellscape_inputs(cn_matrix, annotations, edges_list, cn_data, tree_
             '--path_to_edges_list', edges_list,
             '--path_to_cn_data', cn_data,
             '--path_to_tree', tree_gml,
+            '--path_to_rooted_tree', rooted_tree_gml,
             '--root_id', root_id]
 
     pypeliner.commandline.execute(*cmd)

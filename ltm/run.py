@@ -102,7 +102,7 @@ def main():
                 mgd.OutputFile(output_rmd),
                 mgd.OutputFile(output_hdf),
                 config,
-                args['root_id'],
+                root_id,
                 args['number_of_jobs'],
             ),
         )

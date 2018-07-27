@@ -71,8 +71,9 @@ if __name__=='__main__':
     parser.add_argument("--path_to_edges_list" ,type=str, help='path to output edges list csv')
     parser.add_argument("--path_to_cn_data" ,type=str, help='path to output cn data csv')
     parser.add_argument("-t","--path_to_tree" ,type=str, help='path to tree in gml format')
+    parser.add_argument("--path_to_rooted_tree" ,type=str, help='path to rooted tree in gml format')
     parser.add_argument("-r","--root_id" ,type=str, help='id of the root node')
     args = parser.parse_args()
 
-    main_generate_all(args.path_to_data, args.path_to_annotations, args.path_to_edges_list, args.path_to_cn_data, 
-        args.path_to_tree, args.root_id)
+    main_generate_all(args.path_to_data, args.path_to_annotations, args.path_to_edges_list, args.path_to_cn_data, args.path_to_tree, 
+        args.path_to_rooted_tree, args.root_id)

@@ -23,7 +23,7 @@ def learn_CL(cell_data):
 
 def learn_CL_from_distance(d_files, tree_path):
     G = nx.Graph()
-    
+
     for file in d_files:
         infile=open(file)
         for line in infile:

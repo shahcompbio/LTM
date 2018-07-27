@@ -23,16 +23,16 @@ def create_ltm_scale_workflow(cn_matrix,
     workflow = pypeliner.workflow.Workflow()
 
     # Convert copy number matrix csv file to hdf5 for faster downloading onto compute nodes
-    workflow.transform(
-        name='cn_matrix_to_hdf5',
-        ctx={'mem': config['memory']['med'], 'pool_id': config['pools']['standard'], 'ncpus': 1},
-        func=hdfutils.convert_csv_to_hdf,
-        args=(
-            mgd.InputFile(cn_matrix),
-            mgd.TempOutputFile('cn_matrix.h5'),
-            'copy_number_matrix',
-        ),
-    )
+    # workflow.transform(
+    #     name='cn_matrix_to_hdf5',
+    #     ctx={'mem': config['memory']['med'], 'pool_id': config['pools']['standard'], 'ncpus': 1},
+    #     func=hdfutils.convert_csv_to_hdf,
+    #     args=(
+    #         mgd.InputFile(cn_matrix),
+    #         mgd.TempOutputFile('cn_matrix.h5'),
+    #         'copy_number_matrix',
+    #     ),
+    # )
 
     node_pair_csvs = []
     for job in range(number_jobs):
@@ -59,8 +59,10 @@ def create_ltm_scale_workflow(cn_matrix,
         func=tasks.calculate_distances,
         args=(
             [mgd.TempInputFile(csv) for csv in node_pair_csvs],
-            mgd.TempInputFile('cn_matrix.h5'),
+            # mgd.TempInputFile('cn_matrix.h5'), #FIXME
+            mgd.InputFile(cn_matrix),
             [mgd.TempOutputFile(csv) for csv in distance_csvs],
+            config,
         ),
     )
 
@@ -80,7 +82,8 @@ def create_ltm_scale_workflow(cn_matrix,
         ctx={'mem': config['memory']['med'], 'pool_id': config['pools']['standard'], 'ncpus': 1},
         func=tasks.generate_cellscape_inputs,
         args=(
-            mgd.TempInputFile('cn_matrix.h5'),
+            # mgd.TempInputFile('cn_matrix.h5'), #FIXME
+            mgd.InputFile(cn_matrix),
             mgd.OutputFile(cnv_annots_csv),
             mgd.OutputFile(cnv_tree_edges_csv),
             mgd.OutputFile(cnv_data_csv),

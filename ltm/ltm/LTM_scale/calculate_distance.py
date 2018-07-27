@@ -105,7 +105,8 @@ def read_input_np(data_path, infile_path):
     
     #######
     
-    data = pd.read_hdf(data_path)
+    # data = pd.read_hdf(data_path)
+    data = pd.read_csv(data_path)
     cell_ids = data.columns.values.tolist()[4:]
 
     for cell_id in cell_ids:
