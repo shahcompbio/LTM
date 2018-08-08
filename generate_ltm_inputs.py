@@ -4,6 +4,9 @@ import pandas as pd
 import subprocess
 import numpy as np
 
+directory = os.path.join(
+    os.path.realpath(
+        os.path.dirname(__file__)))
 
 def get_args():
 	parser = argparse.ArgumentParser()
@@ -88,7 +91,7 @@ def get_quality_from_hdf(hmmcopy_hdf_file, alignment_hdf_file, ploidy, merged_cs
 
 
 def classify_metrics(infile, outfile):
-	script = 'classify.R'
+	script = os.path.join(directory, 'classify.R')
 
 	cmd = ['Rscript', script, infile, outfile]
 
